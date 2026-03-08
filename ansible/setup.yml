@@ -1,0 +1,23 @@
+---
+- name: Configure devops-master (Amazon Linux)
+  hosts: master
+  become: yes
+  tasks:
+    - name: Install Terraform Repo & Tools
+      shell: |
+        dnf config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+        dnf install -y terraform java-17-amazon-corretto-devel
+
+- name: Configure devops-agent (Ubuntu)
+  hosts: agent
+  become: yes
+  tasks:
+    - name: Install Docker and Java 17
+      apt:
+        name: [docker.io, openjdk-17-jdk]
+        state: present
+        update_cache: yes
+    - name: Start Docker
+      service: { name: docker, state: started, enabled: yes }
+    - name: Add ubuntu to docker group
+      user: { name: ubuntu, groups: docker, append: yes }
